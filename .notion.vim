@@ -111,7 +111,7 @@ nnoremap eo :call RemoveExtras()<CR>
 call RestorePath()
 
 set syntax=markdown
-call AddExtras()
+"call AddExtras()
 autocmd BufRead * set syntax=markdown
 autocmd TextChanged,TextChangedT,ModeChanged * update
 autocmd ExitPre,QuitPre * call WritePath()
