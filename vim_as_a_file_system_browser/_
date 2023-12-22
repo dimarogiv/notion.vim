@@ -23,7 +23,7 @@ Notion:
 - [ ] And make the notes be able to open the child note inside the current note.
 - [x] Make the possibility to insert links inside the notes
 - [x] Make the possibility to move some notes inside others
-- [ ] add "home", and "go back by history" keys
+- [x] add "home", and "go back by history" keys
 - [ ] if some folder doesn't have any text in _ delete it automatically when
       going back by GoBack()
 - [ ] restore textwidth

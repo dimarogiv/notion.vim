@@ -1,16 +1,15 @@
+let $root = "/home/dima/documents/notion"
+
 func! ChangeDir()
   if !isdirectory(expand("<cword>"))
     call mkdir(expand("<cword>"))
   endif
-
   let path = expand("<cword>")
-
-  call RemoveExtras()
-
+"  call RemoveExtras()
   call chdir(path)
   edit _
-
-  call AddExtras()
+  call WriteMotionHistory()
+"  call AddExtras()
 endfunc
 
 func! Remove()
@@ -18,21 +17,42 @@ func! Remove()
   call popup_notification(message,#{time: 1000})
 endfunc
 
-func! GoBack()
+func! LevelUp()
   if expand("%:p:h:h") != $HOME .. "/documents"
     call chdir(expand("%:p:h:h"))
     edit _
+    call WriteMotionHistory()
   endif
 endfunc
 
+func! GoBack()
+  let pathlist = readfile($root .. "/.motion_history")
+  call remove(pathlist, -1)
+  call writefile(pathlist, $root .. "/.motion_history")
+  let path = copy(pathlist[len(pathlist)-1])
+  call chdir(path)
+  edit _
+endfunc
+
+func! WriteMotionHistory()
+  call writefile([expand("%:p:h")], $root .. "/.motion_history", "a")
+endfunc
+
+func! GoHome()
+  call chdir($root .. "")
+  edit _
+  call writefile([expand("%:p:h")], $root .. "/.motion_history", "a")
+endfunc
+
 func! RestorePath()
-  let path = readfile("/home/dima/documents/notion/.last_path")[0]
+  let pathlist = readfile($root .. "/.motion_history")
+  let path = copy(pathlist[len(pathlist)-1])
   call chdir(path)
   edit _
 endfunc
 
 func! WritePath()
-  call writefile([expand("%:p:h")],"/home/dima/documents/notion/.last_path")
+  call writefile([expand("%:p:h")],$root .. "/.last_path")
 endfunc
 
 func! Rename()
@@ -49,6 +69,7 @@ func! GoSearchResult(id, result)
   let path = split(b:listtogo[a:result-1], ":\t")[0]
   call chdir(path)
   edit _
+  call writefile([expand("%:p:h")], $root .. "/.motion_history", "a")
   call search(g:pattern)
 endfunc
 
@@ -56,7 +77,7 @@ func! SearchNote()
   call inputsave()
   let g:pattern = input('Search: ')
   call inputrestore()
-  let b:list = systemlist("grep -R \"" .. g:pattern .. "\" /home/dima/documents/notion 2>&1 | grep -v 'grep:' | sed 's/\\/_:/:\\t\\t/'")
+  let b:list = systemlist("grep -R \"" .. g:pattern .. "\" " .. $root .. " 2>&1 | grep -v 'grep:' | sed 's/\\/_:/:\\t\\t/'")
   if len(b:list) == 0
     return
   endif
@@ -98,21 +119,22 @@ func! UpdateFile()
   call AddExtras()
 endfunc
 
-set iskeyword+=/,.
-
 nnoremap er :call Remove()<CR>
 nnoremap ef :call ChangeDir()<CR>
-nnoremap eb :call GoBack()<CR>
+nnoremap eu :call LevelUp()<CR>
 nnoremap ec :call Choose()<CR>
 nnoremap en :call Rename()<CR>
 nnoremap es :call SearchNote()<CR>
 nnoremap ea :call AddExtras()<CR>
 nnoremap eo :call RemoveExtras()<CR>
-call RestorePath()
+nnoremap eh :call GoHome()<CR>
+nnoremap eb :call GoBack()<CR>
 
-set syntax=markdown
-"call AddExtras()
 autocmd BufRead * set syntax=markdown
 autocmd TextChanged,TextChangedT,ModeChanged * update
 autocmd ExitPre,QuitPre * call WritePath()
 
+call RestorePath()
+"call AddExtras()
+set syntax=markdown
+set iskeyword+=/,.
