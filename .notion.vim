@@ -1,15 +1,19 @@
 let $root = "/home/dima/documents/notion"
 
-func! ChangeDir()
+func! ChangeDir(path, write)
+  call chdir(a:path)
+  edit _
+  if a:write
+    call WriteMotionHistory()
+  endif
+endfunc
+
+func! JumpNote()
   if !isdirectory(expand("<cword>"))
     call mkdir(expand("<cword>"))
   endif
   let path = expand("<cword>")
-"  call RemoveExtras()
-  call chdir(path)
-  edit _
-  call WriteMotionHistory()
-"  call AddExtras()
+  call ChangeDir(path, 1)
 endfunc
 
 func! Remove()
@@ -22,10 +26,9 @@ func! Remove()
 endfunc
 
 func! LevelUp()
-  if expand("%:p:h:h") != $HOME .. "/documents"
-    call chdir(expand("%:p:h:h"))
-    edit _
-    call WriteMotionHistory()
+  let path = expand("%:p:h:h")
+  if path != $HOME .. "/documents"
+    call ChangeDir(path, 1)
   endif
 endfunc
 
@@ -34,8 +37,7 @@ func! GoBack()
   call remove(pathlist, -1)
   call writefile(pathlist, $root .. "/.motion_history")
   let path = copy(pathlist[len(pathlist)-1])
-  call chdir(path)
-  edit _
+  call ChangeDir(path, 0)
 endfunc
 
 func! WriteMotionHistory()
@@ -43,20 +45,13 @@ func! WriteMotionHistory()
 endfunc
 
 func! GoHome()
-  call chdir($root .. "")
-  edit _
-  call writefile([expand("%:p:h")], $root .. "/.motion_history", "a")
+  call ChangeDir($root, 1)
 endfunc
 
 func! RestorePath()
   let pathlist = readfile($root .. "/.motion_history")
   let path = copy(pathlist[len(pathlist)-1])
-  call chdir(path)
-  edit _
-endfunc
-
-func! WritePath()
-  call writefile([expand("%:p:h")],$root .. "/.last_path")
+  call ChangeDir(path, 0)
 endfunc
 
 func! Rename()
@@ -71,9 +66,7 @@ endfunc
 
 func! GoSearchResult(id, result)
   let path = split(b:listtogo[a:result-1], ":\t")[0]
-  call chdir(path)
-  edit _
-  call writefile([expand("%:p:h")], $root .. "/.motion_history", "a")
+  call ChangeDir(path, 1)
   call search(g:pattern)
 endfunc
 
@@ -95,13 +88,13 @@ endfunc
 
 func! AddExtras()
   let cursorpos = getcurpos()
+  let header = expand("%:p:h")
+  let header = copy("# " .. header)
   call setpos(".", [0, 1, 1, 0, 1])
   autocmd! TextChanged,TextChangedT,ModeChanged
-  normal O
-  normal O
-  normal ihello
-  call histdel("", -3)
-  autocmd TextChanged,TextChangedT,ModeChanged * update
+  execute "normal O"
+  execute "normal O" .. header
+  autocmd TextChanged,TextChangedT,ModeChanged * call UpdateFile()
   let cursorpos[1] = copy(cursorpos[1] + 2)
   call setpos(".", cursorpos)
 endfunc
@@ -112,15 +105,18 @@ func! RemoveExtras()
   autocmd! TextChanged,TextChangedT,ModeChanged
   normal 2dd
   call histdel("", -2)
-  autocmd TextChanged,TextChangedT,ModeChanged * update
+  autocmd TextChanged,TextChangedT,ModeChanged * call UpdateFile()
   let cursorpos[1] = copy(cursorpos[1] - 2)
   call setpos(".", cursorpos)
 endfunc
 
 func! UpdateFile()
-  call RemoveExtras()
   update
-  call AddExtras()
+"  execute "normal :3,$w!\<CR>"
+endfunc
+
+func! Quit()
+  execute "normal :q!\<CR>"
 endfunc
 
 func! Link()
@@ -129,7 +125,7 @@ func! Link()
 endfunc
 
 nnoremap er :call Remove()<CR>
-nnoremap ef :call ChangeDir()<CR>
+nnoremap ef :call JumpNote()<CR>
 nnoremap eu :call LevelUp()<CR>
 nnoremap ec :call Choose()<CR>
 nnoremap en :call Rename()<CR>
@@ -141,11 +137,10 @@ nnoremap eb :call GoBack()<CR>
 nnoremap el :call Link()<CR>
 
 autocmd BufRead * set syntax=markdown
-autocmd TextChanged,TextChangedT,ModeChanged * update
+autocmd TextChanged,TextChangedT,ModeChanged * call UpdateFile()
 autocmd! TextChangedI
-autocmd ExitPre,QuitPre * call WritePath()
+autocmd ExitPre,QuitPre * call Quit()
 
 call RestorePath()
-"call AddExtras()
 set syntax=markdown
 set iskeyword+=/,.
