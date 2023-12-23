@@ -13,8 +13,12 @@ func! ChangeDir()
 endfunc
 
 func! Remove()
-  let message = system("rm -rv " .. expand("<cword>") .. " 2>&1 && echo Removed")
-  call popup_notification(message,#{time: 1000})
+  if len(system("stat " .. expand("<cword>") .. " | grep 'symbolic link'")) == 0
+    let message = system("rm -rv " .. expand("<cword>") .. " 2>&1 && echo Note removed")
+  else
+    let message = system("rm -v " .. expand("<cword>") .. " 2>&1 && echo Link removed")
+  endif
+  call popup_notification(message,#{time: 3000})
 endfunc
 
 func! LevelUp()
@@ -119,6 +123,11 @@ func! UpdateFile()
   call AddExtras()
 endfunc
 
+func! Link()
+  let link_name = expand("%:p:h") .. "/" .. expand("<cword>")
+  vim9cmd execute "normal :!ln -s " .. $old_filename .. " " .. link_name .. "\<CR>"
+endfunc
+
 nnoremap er :call Remove()<CR>
 nnoremap ef :call ChangeDir()<CR>
 nnoremap eu :call LevelUp()<CR>
@@ -129,9 +138,11 @@ nnoremap ea :call AddExtras()<CR>
 nnoremap eo :call RemoveExtras()<CR>
 nnoremap eh :call GoHome()<CR>
 nnoremap eb :call GoBack()<CR>
+nnoremap el :call Link()<CR>
 
 autocmd BufRead * set syntax=markdown
 autocmd TextChanged,TextChangedT,ModeChanged * update
+autocmd! TextChangedI
 autocmd ExitPre,QuitPre * call WritePath()
 
 call RestorePath()

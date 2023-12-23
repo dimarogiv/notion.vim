@@ -25,15 +25,15 @@ Notion:
 - [x] Make the possibility to move some notes inside others
 - [x] add "home", and "go back by history" keys
 - [ ] if some folder doesn't have any text in _ delete it automatically when
-      going back by GoBack()
-- [ ] restore textwidth
+      moving somewhere else
+- [x] restore textwidth
 - [ ] make Rename() function remove the current directory after
       popup_filter_yes_no if it currently exists before inserting new one
-- [ ] make a schedule folder where it moves some tasks to the *../today* folder
+- [ ] make a schedule folder where it moves some tasks to the *../../today* folder
       if the proper time came, or the reminders field, perhaps at the top of the
       home page.
 - [ ] make *dynamic_tables*
-- [ ] make a link function that works with `ln` command
+- [x] make a link function that works with `ln` command
 
 File browser: 
 - [ ] while edititng files it should be saved explicitly, but when not
