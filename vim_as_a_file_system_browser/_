@@ -34,6 +34,10 @@ Notion:
       home page.
 - [ ] make *dynamic_tables*
 - [x] make a link function that works with `ln` command
+- [ ] implement logging system
+- [ ] write tests
+- [x] make it write motion history specifying paths starting with the notion
+      root
 
 File browser: 
 - [ ] while edititng files it should be saved explicitly, but when not

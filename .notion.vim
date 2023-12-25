@@ -1,8 +1,9 @@
 let $root = "/home/dima/documents/notion_devel"
+let $logfile = "/dev/pts/15"
 
 func! WriteLog(text)
   let logstr = strftime("%X") .. ": " .. a:text
-  call writefile([logstr], "/dev/pts/15")
+  call writefile([logstr], $logfile)
 endfunc
 
 func! GoToNote(path)
@@ -44,16 +45,35 @@ func! GoBack()
   call remove(pathlist, -1)
   call writefile(pathlist, $root .. "/.motion_history")
   let path = copy(pathlist[len(pathlist)-1])
+  if path == "/"
+    let path = $root
+  else
+    path = $root .. path
+  endif
+  call WriteLog("GoBack: " .. path)
   call GoToNote(path)
 endfunc
 
 func! WriteMotionHistory()
-  call writefile([expand("%:p:h")], $root .. "/.motion_history", "a")
+  let path = expand("%:p:h")
+  if !len(split(path, $root))
+    let path = "/"
+  else
+    let path = split(path, $root)[0]
+  endif
+  call WriteLog("Written to /.motion_history: " .. path)
+  call writefile([path], $root .. "/.motion_history", "a")
 endfunc
 
 func! RestorePath()
   let pathlist = readfile($root .. "/.motion_history")
   let path = copy(pathlist[len(pathlist)-1])
+  if path == "/"
+    let path = $root
+  else
+    let path = $root .. path
+  endif
+  call WriteLog("RestorePath: " .. path)
   call GoToNote(path)
 endfunc
 
@@ -84,7 +104,7 @@ func! SearchNote()
   let b:listtogo = copy(b:list)
   let listtoshow = copy(b:list)
   for item in range(len(b:list))
-    let listtoshow[item] = split(b:list[item], "/notion")[1]
+    let listtoshow[item] = split(b:list[item], $root)[0]
   endfor
   call popup_menu(listtoshow, #{callback: "GoSearchResult"})
 endfunc
