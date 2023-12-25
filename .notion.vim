@@ -1,19 +1,33 @@
-let $root = "/home/dima/documents/notion"
+let $root = "/home/dima/documents/notion_devel"
 
-func! ChangeDir(path, write)
-  call chdir(a:path)
-  edit _
-  if a:write
-    call WriteMotionHistory()
+func! WriteLog(text)
+  let logstr = strftime("%X") .. ": " .. a:text
+  call writefile([logstr], "/dev/pts/15")
+endfunc
+
+func! GoToNote(path)
+  let path = fnamemodify(a:path, ":p:h")
+  call WriteLog(path)
+  if match(path, $root) >= 0
+    if isdirectory(path)
+      call chdir(path)
+      edit _
+    elseif filereadable(path)
+      edit path
+    else
+      call mkdir(path)
+      call chdir(path)
+      edit _
+    endif
+  else
+    call WriteLog("error: " .. path .. ": the path is unaccessbile!" .. 
+          \ ": match() returns: " .. match(path, $root))
   endif
 endfunc
 
-func! JumpNote()
-  if !isdirectory(expand("<cword>"))
-    call mkdir(expand("<cword>"))
-  endif
-  let path = expand("<cword>")
-  call ChangeDir(path, 1)
+func! WGoToNote(path)
+  call GoToNote(a:path)
+  call WriteMotionHistory()
 endfunc
 
 func! Remove()
@@ -25,33 +39,22 @@ func! Remove()
   call popup_notification(message,#{time: 3000})
 endfunc
 
-func! LevelUp()
-  let path = expand("%:p:h:h")
-  if path != $HOME .. "/documents"
-    call ChangeDir(path, 1)
-  endif
-endfunc
-
 func! GoBack()
   let pathlist = readfile($root .. "/.motion_history")
   call remove(pathlist, -1)
   call writefile(pathlist, $root .. "/.motion_history")
   let path = copy(pathlist[len(pathlist)-1])
-  call ChangeDir(path, 0)
+  call GoToNote(path)
 endfunc
 
 func! WriteMotionHistory()
   call writefile([expand("%:p:h")], $root .. "/.motion_history", "a")
 endfunc
 
-func! GoHome()
-  call ChangeDir($root, 1)
-endfunc
-
 func! RestorePath()
   let pathlist = readfile($root .. "/.motion_history")
   let path = copy(pathlist[len(pathlist)-1])
-  call ChangeDir(path, 0)
+  call GoToNote(path)
 endfunc
 
 func! Rename()
@@ -66,7 +69,7 @@ endfunc
 
 func! GoSearchResult(id, result)
   let path = split(b:listtogo[a:result-1], ":\t")[0]
-  call ChangeDir(path, 1)
+  call WGoToNote(path)
   call search(g:pattern)
 endfunc
 
@@ -125,14 +128,14 @@ func! Link()
 endfunc
 
 nnoremap er :call Remove()<CR>
-nnoremap ef :call JumpNote()<CR>
-nnoremap eu :call LevelUp()<CR>
+nnoremap ef :call WGoToNote(expand("<cword>"))<CR>
+nnoremap eu :call WGoToNote(expand("%:p:h:h"))<CR>
 nnoremap ec :call Choose()<CR>
 nnoremap en :call Rename()<CR>
 nnoremap es :call SearchNote()<CR>
 nnoremap ea :call AddExtras()<CR>
 nnoremap eo :call RemoveExtras()<CR>
-nnoremap eh :call GoHome()<CR>
+nnoremap eh :call WGoToNote($root)<CR>
 nnoremap eb :call GoBack()<CR>
 nnoremap el :call Link()<CR>
 
