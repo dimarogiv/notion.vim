@@ -1,14 +1,20 @@
 The idea: vim should be able to browse all of the file system.
 
-- [ ] When typing gf on some word it goes to that file or folder. If it's a
+- [ ] When typing ef on some word it goes to that file or folder. If it's a
       folder it opens _ there, if it's a file it opens that file.
 - [ ] *header*
-- [ ] the path should be added at the top of each window
+- [ ] the path should be added at the top of each window (requires patching)
 - [ ] find some beautiful replacement for asterisks for denoting the files. It
       could be vertical pipes
 - [ ] reassign the control keys to something more intuitive and more accessible,
       including quit key
 - [ ] make every note be read as an .md file
+- [ ] when searching for a keyword exclude the dot files
+- [ ] when searching for a keyword and clicking ESC it cancels without going
+      anywhere
+- [ ] when searching for a keyword and the menu pops up it cancels and doesn't
+      go anywhere after clicking ESC
+- [ ] make a command for going forward in history
 
 Notion: 
 - [x] while editing notes it saves repeatedly. 
