@@ -52,7 +52,7 @@ On the command line:
 mkdir -p documents/notion
 cd documents/notion
 git clone https://github.com/dimarogiv/notion.vim.git
-echo 'alias note="vim -s documents/notion/.notion.vim" >> ~/.bashrc
+echo 'alias note="vim -S documents/notion/.notion.vim"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -69,4 +69,4 @@ functions.
 
 Now I'm adapting the plugin for easier installation and debugging.
 
-For the new and maintained version see (notion.lua)[https://github.com/dimarogiv/notion.lua]
+For the new and maintained version see [notion.lua](https://github.com/dimarogiv/notion.lua)
