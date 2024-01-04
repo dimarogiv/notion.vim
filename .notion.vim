@@ -1,5 +1,6 @@
-let $root = "/home/dima/documents/notion_devel"
-let $logfile = "/dev/pts/15"
+let $root = $HOME .. "/documents/side-hustle/notion.vim"
+let $history_len = 100
+let $logfile = "/dev/pts/1"
 
 func! WriteLog(text)
   let logstr = strftime("%X") .. ": " .. a:text
@@ -21,8 +22,7 @@ func! GoToNote(path)
       edit _
     endif
   else
-    call WriteLog("error: " .. path .. ": the path is unaccessbile!" .. 
-          \ ": match() returns: " .. match(path, $root))
+    call WriteLog("error: " .. path .. ": the path is unaccessbile!" .. ": match() returns: " .. match(path, $root))
   endif
 endfunc
 
@@ -48,7 +48,7 @@ func! GoBack()
   if path == "/"
     let path = $root
   else
-    path = $root .. path
+    let path = $root .. path
   endif
   call WriteLog("GoBack: " .. path)
   call GoToNote(path)
@@ -62,7 +62,12 @@ func! WriteMotionHistory()
     let path = split(path, $root)[0]
   endif
   call WriteLog("Written to /.motion_history: " .. path)
-  call writefile([path], $root .. "/.motion_history", "a")
+  let pathlist = readfile($root .. "/.motion_history")
+  let pathlist = add(copy(pathlist), copy(path))
+  if len(pathlist) > $history_len
+    let pathlist = copy(pathlist)[0-$history_len:]
+  endif
+  call writefile(pathlist, $root .. "/.motion_history", "s")
 endfunc
 
 func! RestorePath()
