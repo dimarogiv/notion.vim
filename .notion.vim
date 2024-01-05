@@ -41,8 +41,14 @@ func! Remove()
 endfunc
 
 func! GoBack()
-  let pathlist = readfile($root .. "/.motion_history")
-  call remove(pathlist, -1)
+  if filereadable($root .. "/.motion_history") && len(readfile($root .. "/.motion_history")) > 1
+    let pathlist = readfile($root .. "/.motion_history")
+    call WriteLog("len(/.motion_history) = " .. len(readfile($root .. "/.motion_history")))
+    call remove(pathlist, -1)
+  else 
+    call WriteLog("pathlist = [/]")
+    let pathlist = ["/"]
+  endif
   call writefile(pathlist, $root .. "/.motion_history")
   let path = copy(pathlist[len(pathlist)-1])
   if path == "/"
@@ -62,17 +68,25 @@ func! WriteMotionHistory()
     let path = split(path, $root)[0]
   endif
   call WriteLog("Written to /.motion_history: " .. path)
-  let pathlist = readfile($root .. "/.motion_history")
-  let pathlist = add(copy(pathlist), copy(path))
+  if filereadable($root .. "/.motion_history")
+    let pathlist = readfile($root .. "/.motion_history")
+    let pathlist = add(copy(pathlist), copy(path))
+  else 
+    let pathlist = []
+  endif
   if len(pathlist) > $history_len
     let pathlist = copy(pathlist)[0-$history_len:]
   endif
-  call writefile(pathlist, $root .. "/.motion_history", "s")
+  call writefile(pathlist, $root .. "/.motion_history")
 endfunc
 
 func! RestorePath()
-  let pathlist = readfile($root .. "/.motion_history")
-  let path = copy(pathlist[len(pathlist)-1])
+  if filereadable($root .. "/.motion_history") && len(readfile($root .. "/.motion_history")) > 0
+    let pathlist = readfile($root .. "/.motion_history")
+    let path = copy(pathlist[len(pathlist)-1])
+  else 
+    let path = "/"
+  endif
   if path == "/"
     let path = $root
   else
@@ -169,6 +183,7 @@ autocmd TextChanged,TextChangedT,ModeChanged * call UpdateFile()
 autocmd! TextChangedI
 autocmd ExitPre,QuitPre * call Quit()
 
+call WriteLog("$root: " .. $root)
 call RestorePath()
 set syntax=markdown
 set iskeyword+=/,.
