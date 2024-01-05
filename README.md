@@ -47,13 +47,18 @@ name, since the note doesn't exist anymore.
 
 ## How to install
 
+Open your `~/.bashrc` file in any text editor and add this in the beginning:
+```
+export NOTION_DIR="/path/to/your/notes"
+alias note="vim -S $NOTION_DIR/.notion.vim"
+```
+
 On the command line:
 ```
-$ mkdir -p documents/notion
-$ cd documents/notion
-$ git clone https://github.com/dimarogiv/notion.vim.git
-$ echo 'alias note="vim -S documents/notion/.notion.vim"' >> ~/.bashrc
 $ source ~/.bashrc
+$ mkdir -p $NOTION_DIR
+$ cd $NOTION_DIR
+$ git clone https://github.com/dimarogiv/notion.vim.git
 ```
 
 Now, to launch it just type `note` on the command line.

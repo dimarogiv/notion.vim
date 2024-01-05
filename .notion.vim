@@ -1,4 +1,4 @@
-let $root = $HOME .. "/documents/side-hustle/notion.vim"
+let $root = $NOTION_DIR
 let $history_len = 100
 let $logfile = "/dev/pts/1"
 
