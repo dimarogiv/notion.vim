@@ -74,4 +74,4 @@ functions.
 
 Now I'm adapting the plugin for easier installation and debugging.  
 
-For the new and maintained version see [notion.lua](https://github.com/dimarogiv/notion.lua)
+For the new and maintained version see [vinote](https://github.com/dimarogiv/vinote)
